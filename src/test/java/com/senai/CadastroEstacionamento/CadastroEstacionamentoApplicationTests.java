@@ -1,4 +1,4 @@
-package com.senai.demo;
+package com.senai.CadastroEstacionamento;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
