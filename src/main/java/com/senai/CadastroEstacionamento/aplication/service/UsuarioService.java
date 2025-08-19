@@ -6,6 +6,7 @@ import com.senai.CadastroEstacionamento.aplication.dtos.UsuarioDto;
 import com.senai.CadastroEstacionamento.domain.entity.Carro;
 import com.senai.CadastroEstacionamento.domain.entity.Cliente;
 import com.senai.CadastroEstacionamento.domain.entity.Usuario;
+import com.senai.CadastroEstacionamento.domain.exception.IdDesconhecidoException;
 import com.senai.CadastroEstacionamento.domain.repository.CarroRepository;
 import com.senai.CadastroEstacionamento.domain.repository.EstacionamentoRepository;
 import com.senai.CadastroEstacionamento.domain.repository.UsuarioRepository;
@@ -42,12 +43,12 @@ public class UsuarioService {
                 .collect(Collectors.toList());
     }
 
-    public Optional<UsuarioDto> buscarPorId(Long id) {
-        return usuarioRepo.findById(id)
-                .map(UsuarioDto::toDto);
+    public Usuario buscarPorId(Long id) {
+        return usuarioRepo.findById(id).orElseThrow(() -> new IdDesconhecidoException("Usuário não encontrado com o ID: " + id));
     }
 
     public boolean atualizar(Long id, UsuarioDto dto) {
+        usuarioRepo.findById(id).orElseThrow(() -> new IdDesconhecidoException("Usuário não encontrado com o ID: " + id));
         return usuarioRepo.findById(id).map(usuario -> {
             Usuario usuarioAtualizado = dto.fromDto();
             usuario.setNome(usuarioAtualizado.getNome());
@@ -61,52 +62,10 @@ public class UsuarioService {
     }
 
     public boolean deletar(Long id) {
-        return usuarioRepo.findById(id).map(usuario -> {
-            usuarioRepo.deleteById(id);
-            return true;
-        }).orElse(false);
-    }
-
-    //Regras de negócio
-    public List<CarroDto> listarCarrosClientes(Long id) {
-        return new ArrayList<CarroDto>();
-    }
-
-    public Optional<CarroDto> listarCarroPorId(Long idCarro) {
-        return carroRepo.findById(idCarro).map(CarroDto::toDto);
-    }
-
-    public boolean ligarCarroACliente(Long idCliente, CarroDto carroDto) {
-        var cliente = usuarioRepo.findById(idCliente).orElseThrow(() -> new RuntimeException("Cliente não encontrado"));
-
-       return true;
-    }
-
-    public boolean alterarInfoCarro(Long idCarro) {
-        return true;
-    }
-
-    public boolean deletarCarro(Long idCarro) {
-       return true;
-    }
-
-    public List<EstacionamentoDto> listarEstacionamentos(Long id) {
-        return new ArrayList<EstacionamentoDto>();
-    }
-
-    public Optional<EstacionamentoDto> listarEstacionamentoPorId(Long idEstacionamento) {
-        return estacionamentoRepo.findById(idEstacionamento).map(EstacionamentoDto::toDto);
-    }
-
-    public boolean ligarEstacionamentoAGerente(Long id, EstacionamentoDto estacionamentoDto) {
-        return true;
-    }
-
-    public boolean alterarInfoEstacionamento(Long idEstacionamento) {
-        return true;
-    }
-
-    public boolean deletarEstacionamentos(Long idEstacionamento) {
+        if (!usuarioRepo.existsById(id)){
+            throw new IdDesconhecidoException("Usuário não encontrado com o ID: " + id);
+        }
+        usuarioRepo.deleteById(id);
         return true;
     }
 }

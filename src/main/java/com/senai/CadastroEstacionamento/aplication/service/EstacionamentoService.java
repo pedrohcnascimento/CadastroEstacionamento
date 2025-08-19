@@ -2,6 +2,7 @@ package com.senai.CadastroEstacionamento.aplication.service;
 
 import com.senai.CadastroEstacionamento.aplication.dtos.EstacionamentoDto;
 import com.senai.CadastroEstacionamento.domain.entity.Estacionamento;
+import com.senai.CadastroEstacionamento.domain.exception.IdDesconhecidoException;
 import com.senai.CadastroEstacionamento.domain.repository.EstacionamentoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,12 +29,13 @@ public class EstacionamentoService {
                 .collect(Collectors.toList());
     }
 
-    public Optional<EstacionamentoDto> buscarPorId(Long id) {
-        return estacionamentoRepository.findById(id)
-                .map(EstacionamentoDto::toDto);
+    public Estacionamento buscarPorId(Long id) {
+        return estacionamentoRepository.findById(id).orElseThrow(() -> new IdDesconhecidoException("Usuário não encontrado com o ID: " + id));
+
     }
 
     public boolean atualizar(Long id, EstacionamentoDto dto) {
+        estacionamentoRepository.findById(id).orElseThrow(() -> new IdDesconhecidoException("Usuário não encontrado com o ID: " + id));
         return estacionamentoRepository.findById(id).map(estacionamento -> {
             Estacionamento estacionamentoAtualizado = dto.fromDto();
             estacionamento.setNome(estacionamentoAtualizado.getNome());
@@ -44,10 +46,11 @@ public class EstacionamentoService {
     }
 
     public boolean deletar(Long id) {
-        return estacionamentoRepository.findById(id).map(estacionamento -> {
-            estacionamentoRepository.deleteById(id);
-            return true;
-        }).orElse(false);
+        if (!estacionamentoRepository.existsById(id)){
+            throw new IdDesconhecidoException("Usuário não encontrado com o ID: " + id);
+        }
+        estacionamentoRepository.deleteById(id);
+        return true;
     }
 
 

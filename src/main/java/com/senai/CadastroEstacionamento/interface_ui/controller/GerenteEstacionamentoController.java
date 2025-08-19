@@ -1,42 +1,43 @@
 package com.senai.CadastroEstacionamento.interface_ui.controller;
 
 import com.senai.CadastroEstacionamento.aplication.dtos.EstacionamentoDto;
-import com.senai.CadastroEstacionamento.aplication.service.UsuarioService;
+import com.senai.CadastroEstacionamento.aplication.service.GerenteEstacionamentoService;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
+@Tag(name = "Gerentes de Estacionamento", description = "Gerencia as ações que somentes os gerentes de estacionamento podem realizar no sistema")
 @RestController
 @RequestMapping("/gerentesEstacionamentos")
 public class GerenteEstacionamentoController {
 
     @Autowired
-    UsuarioService usuarioService;
+    GerenteEstacionamentoService gerenteEstacionamentoService;
 
     @GetMapping("/{id}/estacionamentos")
     public ResponseEntity<List<EstacionamentoDto>> listarEstacionamentos(@PathVariable Long id) {
-        return ResponseEntity.ok(usuarioService.listarEstacionamentos(id));
+        return ResponseEntity.ok(gerenteEstacionamentoService.listarEstacionamentos(id));
     }
 
     @GetMapping("/{id}/estacionamentos/{idEstacionamento}")
-    public ResponseEntity<Optional<EstacionamentoDto>> listarOcorrenciaPorId(@PathVariable Long id, @PathVariable Long idEstacionamento) {
-        return ResponseEntity.ok(usuarioService.listarEstacionamentoPorId(idEstacionamento));
+    public ResponseEntity<EstacionamentoDto> listarOcorrenciaPorId(@PathVariable Long id, @PathVariable Long idEstacionamento) {
+        return ResponseEntity.ok(EstacionamentoDto.toDto(gerenteEstacionamentoService.listarEstacionamentoPorId(idEstacionamento)));
     }
 
     @PutMapping("/{id}/estacionamentos")
     public ResponseEntity<String> ligarEstacionamentoAGerente(@PathVariable Long id, @RequestBody EstacionamentoDto estacionamentoDto) {
-        if (usuarioService.ligarEstacionamentoAGerente(id, estacionamentoDto)) {
-            return ResponseEntity.ok("Ocorrência de saída adiantada adicionada!");
+        if (gerenteEstacionamentoService.ligarEstacionamentoAGerente(id, estacionamentoDto)) {
+            return ResponseEntity.ok("Estacionamento adicionado com sucesso!");
         }
         return ResponseEntity.notFound().build();
     }
 
     @PutMapping("/{id}/estacionamentos/{idEstacionamento}")
     public ResponseEntity<String> alterarInfoEstacionamento(@PathVariable Long id, @PathVariable Long idEstacionamento) {
-        if (usuarioService.alterarInfoEstacionamento(idEstacionamento)) {
+        if (gerenteEstacionamentoService.alterarInfoEstacionamento(idEstacionamento)) {
             return ResponseEntity.ok("Status alterado");
         } else {
             return ResponseEntity.notFound().build();
@@ -45,7 +46,7 @@ public class GerenteEstacionamentoController {
 
     @DeleteMapping("/{id}/estacionamentos/{idEstacionamentos}")
     public ResponseEntity<String> deletarEstacionamentos(@PathVariable Long id, @PathVariable Long idEstacionamento) {
-        if (usuarioService.deletarEstacionamentos(idEstacionamento)) {
+        if (gerenteEstacionamentoService.deletarEstacionamentos(idEstacionamento)) {
             return ResponseEntity.ok("Ocorrência inativada");
         } else {
             return ResponseEntity.notFound().build();
